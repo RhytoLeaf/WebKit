@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="WebKit — a tokenized design system built in the open: design tokens, reusable accessible components, WCAG 2.2 AA and Core Web Vitals enforced in CI.">
+  <title>WebKit — a design system built in the open</title>
+  <link rel="stylesheet" href="/dist/tokens.css">
+  <link rel="stylesheet" href="/webkit.css">
+</head>
+<body>
+  <header>
+    <h1>WebKit</h1>
+    <p class="tagline">A tiny, tokenized design system: <strong>design tokens → reusable accessible components → automated quality</strong>. Zero dependencies, zero build, MIT licensed — Field Kit FK-1 in the rhytoleaf.ca proof-of-capability series.</p>
+    <div class="badges" aria-label="Quality gates">
+      <wk-badge tone="success">WCAG 2.2 AA — axe in CI</wk-badge>
+      <wk-badge tone="info">Core Web Vitals — Lighthouse gate</wk-badge>
+      <wk-badge tone="neutral">5 Web Components</wk-badge>
+      <wk-badge tone="neutral">Tokens = single source of truth</wk-badge>
+    </div>
+  </header>
+
+  <main>
+    <section aria-labelledby="t-tokens">
+      <h2 id="t-tokens">Design tokens</h2>
+      <p>One JSON file (<code>tokens.json</code>) generates every color, type, space, radius, shadow, and motion value. CI regenerates <code>dist/tokens.css</code> and fails the build on drift — tokens are the contract, not the CSS.</p>
+      <div class="swatches">
+        <div class="swatch"><div class="chip" style="background:#2e7d5b"></div><code>--wk-color-brand-500</code></div>
+        <div class="swatch"><div class="chip" style="background:#1f5741"></div><code>--wk-color-brand-700</code></div>
+        <div class="swatch"><div class="chip" style="background:#1d231f"></div><code>--wk-color-neutral-900</code></div>
+        <div class="swatch"><div class="chip" style="background:#e8ecea"></div><code>--wk-color-neutral-100</code></div>
+        <div class="swatch"><div class="chip" style="background:#c0392b"></div><code>--wk-color-semantic-danger</code></div>
+        <div class="swatch"><div class="chip" style="background:#2e7d32"></div><code>--wk-color-semantic-success</code></div>
+      </div>
+    </section>
+
+    <section aria-labelledby="t-components">
+      <h2 id="t-components">Components</h2>
+      <p>Five framework-agnostic Web Components, styled exclusively from tokens. Drop them into any stack.</p>
+
+      <h3>wk-button</h3>
+      <div class="row">
+        <wk-button>Primary</wk-button>
+        <wk-button variant="secondary">Secondary</wk-button>
+        <wk-button variant="ghost">Ghost</wk-button>
+        <wk-button disabled>Disabled</wk-button>
+      </div>
+      <pre class="code" aria-label="Button usage"><wk-button variant="secondary">Deploy</wk-button></pre>
+
+      <h3>wk-badge</h3>
+      <div class="row">
+        <wk-badge tone="info">info</wk-badge>
+        <wk-badge tone="success">success</wk-badge>
+        <wk-badge tone="warning">warning</wk-badge>
+        <wk-badge tone="danger">danger</wk-badge>
+      </div>
+
+      <h3>wk-card</h3>
+      <wk-card title="Reusable card">Cards carry a title plus arbitrary slotted content — the atomic surface for dashboards and docs.</wk-card>
+
+      <h3>wk-field</h3>
+      <wk-field label="Email" type="email" hint="We only use this for the demo." placeholder="you@example.com"></wk-field>
+      <wk-field label="Contract number" error="Required field."></wk-field>
+
+      <h3>wk-notice</h3>
+      <wk-notice tone="success">Deployed — tokens regenerated in CI.</wk-notice>
+      <wk-notice tone="danger">Lighthouse gate failed: accessibility 84 &lt; 90.</wk-notice>
+    </section>
+
+    <section aria-labelledby="t-a11y">
+      <h2 id="t-a11y">Accessibility</h2>
+      <ul class="checks">
+        <li>WCAG 2.2 AA target: semantic roles (<code>role=status</code>/<code>role=alert</code>), label association, <code>aria-invalid</code> + <code>aria-describedby</code> error wiring.</li>
+        <li>Visible <code>:focus-visible</code> rings; all interactive elements are native <code>&lt;button&gt;</code>/<code>&lt;input&gt;</code>.</li>
+        <li>Every semantic color pair verified ≥ 4.5:1 contrast against the surface.</li>
+        <li><code>prefers-reduced-motion</code> honored site-wide.</li>
+        <li><strong>axe-core runs on every push in CI</strong> — see <code>a11y/ACCESSIBILITY.md</code> for the full checklist.</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="t-cwv">
+      <h2 id="t-cwv">Core Web Vitals (live)</h2>
+      <p>Measured on this very page with <code>web-vitals</code> — Lighthouse additionally gates each CI run at ≥ 90 across performance, accessibility, best-practices, and SEO.</p>
+      <pre id="cwv" class="code">LCP: measuring…
+INP: measuring…
+CLS: measuring…</pre>
+      <script type="module">
+        import { onLCP, onINP, onCLS } from 'https://unpkg.com/web-vitals@4/dist/web-vitals.es2019.js';
+        const out = document.getElementById('cwv');
+        const lines = { LCP: 'LCP: measuring…', INP: 'INP: measuring…', CLS: 'CLS: measuring…' };
+        const show = (m, key) => {
+          lines[key] = key + ': ' + (m.name === 'CLS' ? m.value.toFixed(3) : Math.round(m.value) + ' ms');
+          out.textContent = Object.values(lines).join('\n');
+        };
+        onLCP(m => show(m, 'LCP')); onINP(m => show(m, 'INP')); onCLS(m => show(m, 'CLS'));
+      </script>
+    </section>
+
+    <section aria-labelledby="t-about">
+      <h2 id="t-about">About this kit</h2>
+      <p>WebKit is Field Kit <strong>FK-1</strong> of the <a href="https://rhytoleaf.ca">rhytoleaf.ca</a> <em>Proof of Capability</em> series — a public, demoable reference for web-platform disciplines: design systems, accessibility, performance, and CI-enforced quality. Built in the open with an AI agent team; every commit human-reviewed.</p>
+      <p>Tech ring — <em>languages:</em> JavaScript, HTML, CSS · <em>tooling:</em> Node.js, GitHub Actions, Lighthouse, axe-core, web-vitals</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>RhytoLeaf · <a href="https://rhytoleaf.ca">rhytoleaf.ca</a> · <a href="https://github.com/RhytoLeaf">github.com/RhytoLeaf</a> · MIT licensed</p>
+  </footer>
+
+  <script type="module" src="/webkit.js"></script>
+</body>
+</html>
