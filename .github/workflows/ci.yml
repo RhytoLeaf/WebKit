@@ -1,0 +1,55 @@
+name: quality
+
+on:
+  push:
+    branches: [main]
+  pull_request: {}
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Install tooling
+        run: npm init -y && npm i -D @axe-core/puppeteer puppeteer lighthouse chrome-launcher
+      - name: Token pipeline (fail on drift)
+        run: |
+          node tokens.mjs
+          if ! git diff --quiet dist/tokens.css; then
+            git diff dist/tokens.css
+            echo "tokens.json changed but dist/tokens.css not regenerated" >&2
+            exit 1
+          fi
+      - name: Accessibility (axe-core, WCAG 2.2 AA)
+        run: node a11y-check.mjs
+      - name: Core Web Vitals + Lighthouse gate
+        run: node lh-check.mjs
+
+  pages:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: quality
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Regenerate tokens
+        run: node tokens.mjs
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
